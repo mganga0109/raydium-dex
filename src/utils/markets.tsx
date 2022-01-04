@@ -17,7 +17,7 @@ import {
   TOKEN_MINTS,
   TokenInstructions
 } from '@project-serum/serum';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import {getCache, setCache} from './fetch-loop';
 import {
   divideBnToNumber,
@@ -952,8 +952,43 @@ export const USE_MARKETS: MarketInfo[] = _IGNORE_DEPRECATED
   ? _MARKETS.map((m) => ({ ...m, deprecated: false }))
   : _MARKETS;
 
+const fetchSerumMarketList = async () => {
+  try {
+    const res = await fetch("https://dev-api.birdeye.so/amm/pairs?source=serum");
+    const { success, data } = await res.json();
+
+    if (!success || !data) throw new Error("error");
+
+    return data.items;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
 export function useMarketsList() {
-  return USE_MARKETS.filter(({ deprecated }) => !deprecated);
+  const [markets, setMarkets] = useState([]);
+
+  const getSerumMarketList = useCallback(async () => {
+    let serumMarketList = await fetchSerumMarketList();
+    serumMarketList = serumMarketList.map(item => {
+      return {
+        name: item.name,
+        deprecated: false,
+        address: new PublicKey(item.address),
+        programId: new PublicKey(item.programId),
+      }
+    })
+
+    setMarkets(serumMarketList);
+  }, [])
+
+  useEffect(() => {
+    getSerumMarketList();
+  }, [getSerumMarketList])
+
+  return markets;
+  // return USE_MARKETS.filter(({ deprecated }) => !deprecated);
 }
 
 export function useAllMarkets() {

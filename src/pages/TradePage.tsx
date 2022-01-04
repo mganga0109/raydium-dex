@@ -149,7 +149,7 @@ function TradePageInner() {
     const newCustomMarkets = customMarkets.filter((m) => m.address !== address);
     setCustomMarkets(newCustomMarkets);
   };
-  const [newMarKets] = useState(markets);
+  // const [newMarKets] = useState(markets);
 
   return (
     <>
@@ -166,7 +166,7 @@ function TradePageInner() {
         >
           <Col>
             <MarketSelector
-              markets={newMarKets}
+              markets={markets}
               setHandleDeprecated={setHandleDeprecated}
               placeholder={'Select market'}
               customMarkets={customMarkets}
